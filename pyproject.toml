@@ -1,0 +1,13 @@
+[tool.black]
+line-length = 127
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+pythonpath = "."
+addopts = "--import-mode=importlib"
+filterwarnings = [
+	"ignore::DeprecationWarning", # Get rid of pesky verbose warnings. You can always get them back running `pytest -Wall`.
+]
