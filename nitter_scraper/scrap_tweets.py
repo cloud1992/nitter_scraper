@@ -1,21 +1,14 @@
-from datetime import datetime
-import re
-from typing import Dict, Optional
-from pprint import pprint
-from bs4 import BeautifulSoup
+from typing import Optional
+
 import requests
+from bs4 import BeautifulSoup
 
 from nitter_scraper.schema import Tweet  # noqa: I100, I202
-from nitter_scraper.utils import (
-    timeline_parser,
+from nitter_scraper.utils import (  # noqa: I100, I202
     pagination_parser,
-    clean_stat,
-    link_parser,
-    date_parser,
-    stats_parser,
-    attachment_parser,
     parse_tweet,
-)  # noqa: I100, I202
+    timeline_parser,
+)
 
 
 def get_tweets(
@@ -69,14 +62,13 @@ def get_tweets(
                         continue
 
                     tweet_data = parse_tweet(item)
-                    pprint(tweet_data)
-                    # tweet = Tweet.from_dict(tweet_data)
+                    tweet = Tweet.from_dict(tweet_data)
 
-            #         if tweet.tweet_id == break_on_tweet_id:
-            #             pages = 0
-            #             break
+                    if tweet.tweet_id == break_on_tweet_id:
+                        pages = 0
+                        break
 
-            #         yield tweet
+                    yield tweet
 
             response = requests.get(next_url)
             pages -= 1

@@ -1,6 +1,6 @@
-from typing import Dict
-from datetime import datetime
 import re
+from datetime import datetime
+from typing import Dict
 
 
 def timeline_parser(soup):
@@ -53,7 +53,10 @@ def stats_parser(tweet_stats):
         # print(f"ic: {ic}")
         key = ic.find("span").get("class")[0].replace("icon", "").replace("-", "")
         # print(f"span_icon: {key}")
+        if ic.text == "":
+            value = 0
         value = ic.text
+
         stats[key] = value
     return stats
 
@@ -61,13 +64,21 @@ def stats_parser(tweet_stats):
 def attachment_parser(attachments):
     photos, videos = [], []
     if attachments:
-        photos = [i.attrs["src"] for i in attachments.find("img")]
-        videos = [i.attrs["src"] for i in attachments.find("source")]
+        if attachments.find("img"):
+            photos = ["https://nitter.net" + i.get("src") for i in attachments.find_all("img")]
+        else:
+            photos = []
+        if attachments.find("source"):
+            videos = ["https://nitter.net" + i.get("src") for i in attachments.find_all("source")]
+        else:
+            videos = []
+
     return photos, videos
 
 
-def url_parser(links):
-    return sorted(filter(lambda link: "http://" in link or "https://" in link, links))
+def url_parser(text):
+    content_split = text.split(" ")
+    return [i for i in content_split if "http://" in i or "https://" in i]
 
 
 def cashtag_parser(text):
@@ -84,7 +95,8 @@ def parse_tweet(soup) -> Dict:
     data = {}
     id, username, url = link_parser(soup.find("a", class_="tweet-link"))
     data["tweet_id"] = id
-    data["tweet_url"] = url
+    data["nitter_url"] = url
+    data["tweet_url"] = url.replace("nitter.net", "twitter.com")
     data["username"] = username
 
     retweet = soup.find("div", class_="retweet-header")
@@ -95,31 +107,36 @@ def parse_tweet(soup) -> Dict:
     pinned = body.find("div", class_="pinned")
     data["is_pinned"] = True if pinned else False
 
-    data["time"] = date_parser(body.find("span", class_="tweet-date").find("a").get("title"))
+    data["date"] = date_parser(body.find("span", class_="tweet-date").find("a").get("title"))
 
     content = body.find("div", class_="tweet-content")
-    data["text"] = content.text
+    data["raw_content"] = content.text
+    data["rendered_content"] = content.text.replace("\n", " ")
 
     stats = stats_parser(soup.find("div", class_="tweet-stats"))
 
     if stats.get("comment"):
-        data["replies"] = clean_stat(stats.get("comment"))
+        data["replies_count"] = clean_stat(stats.get("comment"))
+    else:
+        data["replies_count"] = 0
 
     if stats.get("retweet"):
-        data["retweets"] = clean_stat(stats.get("retweet"))
+        data["retweet_count"] = clean_stat(stats.get("retweet"))
+    else:
+        data["retweet_count"] = 0
 
     if stats.get("heart"):
-        data["likes"] = clean_stat(stats.get("heart"))
+        data["like_count"] = clean_stat(stats.get("heart"))
+    else:
+        data["like_count"] = 0
 
     # entries = {}
     data["hashtags"] = hashtag_parser(content.text)
     data["cashtags"] = cashtag_parser(content.text)
-    # entries["urls"] = url_parser(content.links)
+    data["urls"] = url_parser(content.text)
 
-    # photos, videos = attachment_parser(body.find(".attachments", first=True))
-    # entries["photos"] = photos
-    # entries["videos"] = videos
+    photos, videos = attachment_parser(body.find("div", class_="attachments"))
+    data["photos"] = photos
+    data["videos"] = videos
 
-    # data["entries"] = entries
-    # quote = soup.find(".quote", first=True) #NOTE: Maybe useful later on
     return data

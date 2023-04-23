@@ -4,27 +4,6 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel as Base
 
 
-class Entries(Base):
-    """Contains metadata parsed from the text contents of the tweet.
-
-    This object is a subclass of the pydantic BaseModel which makes it easy to serialize
-    the object with the .dict() and json() methods.
-
-    Attributes:
-        hashtags: Contains all hashtags parsed from the tweet. Example #Bitcoin.
-        cashtags: Contains all cashtags parsed from the tweet. Example $BTC
-        urls: Contains all URLs parsed from the tweet excluding photo/video media links.
-        photos: Contains all URLs that link to photo media.
-        videos: Contains all URLs that link to video media.
-    """
-
-    hashtags: List[str]
-    cashtags: List[str]
-    urls: List[str]
-    photos: List[str]
-    videos: List[str]
-
-
 class Tweet(Base):
     """Represents a status update from a twitter user.
 
@@ -48,16 +27,21 @@ class Tweet(Base):
 
     tweet_id: int
     tweet_url: str
+    nitter_url: str
     username: str
-    # user_id: int # unable to parse from nitter.
     is_retweet: bool
     is_pinned: bool
-    time: datetime
-    text: str
-    replies: int
-    retweets: int
-    likes: int
-    entries: Entries
+    date: datetime
+    raw_content: str
+    rendered_content: str
+    replies_count: int
+    retweet_count: int
+    like_count: int
+    hashtags: List[str]
+    cashtags: List[str]
+    urls: List[str]
+    photos: List[str]
+    videos: List[str]
 
     @classmethod
     def from_dict(cls, elements: Dict[str, Any]) -> "Tweet":
