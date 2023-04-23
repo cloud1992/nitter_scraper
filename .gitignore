@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 *.pyc
 
+nitter_scraper/__pycache__/
 # C extensions
 *.so
 #mongodb database
