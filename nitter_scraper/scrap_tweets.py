@@ -18,14 +18,16 @@ def get_tweets(
     break_on_tweet_id: Optional[int] = None,
     address=None,
 ) -> Tweet:
-    """Gets the target users tweets
+    """Gets the target tweets
 
     Args:
+        search_kind: The kind of search to perform. Can be either "user" or whatever
+          (this means smart search using url search).
         username: Targeted users username.
         pages: Max number of pages to lookback starting from the latest tweet.
         break_on_tweet_id: Gives the ability to break out of a loop if a tweets id is found.
-        address: The address to scrape from. The default is https://nitter.net which should
-            be used as a fallback address.
+        address: The address to scrape from. The default if search_kind = "user" is https://nitter.net which should
+            be used as a fallback address, else the address is the search url.
 
     Yields:
         Tweet Objects
@@ -37,7 +39,7 @@ def get_tweets(
     else:
         url = address
 
-    def gen_tweets(pages):
+    def gen_tweets(pages: int) -> Tweet:
         response = requests.get(url)
 
         while pages > 0:
@@ -46,19 +48,13 @@ def get_tweets(
                 html = response.content
                 soup = BeautifulSoup(html, "html.parser")
                 timeline = timeline_parser(soup)
-                # print(f"Timeline: {timeline}")
-
-                next_url = pagination_parser(timeline, address, username, search_kind)
-                print(f"Next URL: {next_url}")
 
                 timeline_items = timeline.find_all("div", class_="timeline-item")
 
                 print(f"El numero de timeline_items es: {len(timeline_items)}")
 
                 for item in timeline_items:
-                    # print(f"Item: {item}")
                     if "show-more" in item.get("class"):
-                        print(f"Item: {item}")
                         continue
 
                     tweet_data = parse_tweet(item)
@@ -70,6 +66,11 @@ def get_tweets(
 
                     yield tweet
 
+            next_url = pagination_parser(timeline, username, search_kind)
+            print(f"Next URL: {next_url}")
+            if next_url == "search ended":
+                pages = 0
+                break
             response = requests.get(next_url)
             pages -= 1
 

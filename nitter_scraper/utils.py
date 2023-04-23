@@ -2,26 +2,32 @@ import re
 from datetime import datetime
 from typing import Dict
 
+from bs4 import Tag
 
-def timeline_parser(soup):
+
+def timeline_parser(soup: Tag):
     return soup.find("div", class_="timeline")
 
 
-def pagination_parser(timeline, address: str, username: str, search_kind: str) -> str:
+def pagination_parser(timeline, username: str, search_kind: str) -> str:
     show_more_tag = timeline.find("div", class_="show-more")
     next_page = ""
     if show_more_tag is not None:
         if "timeline-item" in show_more_tag["class"]:
             show_more_div = show_more_tag.find_next_sibling("div", class_="show-more")
-            next_page_tag = show_more_div.find("a")
-            if next_page_tag is not None:
-                next_page = next_page_tag.get("href")
+            if show_more_div is not None:
+                next_page_tag = show_more_div.find("a")
+                if next_page_tag is not None:
+                    next_page = next_page_tag.get("href")
+            else:
+                return "search ended"
+
         else:
             next_page_tag = show_more_tag.find("a")
             if next_page_tag is not None:
                 next_page = next_page_tag.get("href")
     if search_kind == "user":
-        return f"{address}/{username}{next_page}"
+        return f"https://nitter.net/{username}{next_page}"
     else:
         return f"https://nitter.net/search{next_page}"
 
@@ -50,9 +56,7 @@ def date_parser(tweet_date):
 def stats_parser(tweet_stats):
     stats = {}
     for ic in tweet_stats.find_all("div", class_="icon-container"):
-        # print(f"ic: {ic}")
         key = ic.find("span").get("class")[0].replace("icon", "").replace("-", "")
-        # print(f"span_icon: {key}")
         if ic.text == "":
             value = 0
         value = ic.text
