@@ -40,7 +40,11 @@ def get_tweets(
         url = address
 
     def gen_tweets(pages: int) -> Tweet:
-        response = requests.get(url)
+        try:
+            response = requests.get(url)
+        except requests.exceptions.ConnectionError:
+            print("Connection Error")
+            return
 
         while pages > 0:
             if response.status_code == 200:

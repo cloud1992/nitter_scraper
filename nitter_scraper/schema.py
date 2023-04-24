@@ -64,7 +64,7 @@ class Profile(Base):
     the object with the .dict() and json() methods.
 
     Attributes:
-        username: The users screen_name, handle or alias. '@dgnsrekt'
+        username: The users screen_name, handle or alias. '@elonmusck'
         name: The users name as they've defined it.
         profile_photo: URL reference to the profiles photo.
         tweets_count: The number of Tweets (including retweets) issued by the user.
@@ -83,7 +83,6 @@ class Profile(Base):
 
     username: str
     name: str
-    # birthday: str #NOTE: need to find a twitter page with birthday to parse.
     profile_photo: str
     tweets_count: int
     following_count: int
