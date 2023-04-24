@@ -95,7 +95,7 @@ def hashtag_parser(text):
     return hashtag_regex.findall(text)
 
 
-def parse_tweet(soup) -> Dict:
+def parse_tweet(soup: Tag) -> Dict:
     data = {}
     id, username, url = link_parser(soup.find("a", class_="tweet-link"))
     data["tweet_id"] = id
@@ -144,3 +144,120 @@ def parse_tweet(soup) -> Dict:
     data["videos"] = videos
 
     return data
+
+
+# profile parser#
+def profile_full_name_parser(soup: Tag) -> str:
+    profile_full_name = soup.find("a", class_="profile-card-fullname").text
+    return profile_full_name
+
+
+def profile_username_parser(soup: Tag) -> str:
+    profile_username = soup.find("a", class_="profile-card-username").text
+    return profile_username.replace("@", "")
+
+
+def profile_photo_parser(soup: Tag) -> str:
+    profile_photo_tag = soup.find("a", class_="profile-card-avatar")
+    if profile_photo_tag is None:
+        return None
+    profile_photo = profile_photo_tag.find("img").get("src")
+    profile_photo_url = "https://nitter.net" + profile_photo
+    return profile_photo_url
+
+
+def profile_biography_parser(soup: Tag) -> str:
+    profile_biography = soup.find("div", class_="profile-bio").text
+    return profile_biography
+
+
+def profile_location_parser(soup: Tag) -> str:
+    profile_location = soup.find("div", class_="profile-location")
+    if profile_location is None:
+        return None
+    return profile_location.text.replace("\n", "")
+
+
+def profile_joined_parser(soup: Tag) -> str:
+    profile_joined = soup.find("div", class_="profile-joindate")
+    if profile_joined is None:
+        return None
+    joined_date_string = profile_joined.find("span").get("title")
+
+    date_format = "%I:%M %p - %d %b %Y"
+    joined_date = datetime.strptime(joined_date_string, date_format)
+    return joined_date
+
+
+def profile_tweets_count_parser(soup: Tag) -> int:
+    profile_tweets_count = soup.find("li", class_="posts")
+    if profile_tweets_count is None:
+        return 0
+    profile_tweets_count = profile_tweets_count.find("span", class_="profile-stat-num").text
+    return int(profile_tweets_count.replace(",", ""))
+
+
+def profile_followers_count_parser(soup: Tag) -> int:
+    profile_followers_count = soup.find("li", class_="followers")
+    if profile_followers_count is None:
+        return 0
+    profile_followers_count = profile_followers_count.find("span", class_="profile-stat-num").text
+    return int(profile_followers_count.replace(",", ""))
+
+
+def profile_following_count_parser(soup: Tag) -> int:
+    profile_following_count = soup.find("li", class_="following")
+    if profile_following_count is None:
+        return 0
+    profile_following_count = profile_following_count.find("span", class_="profile-stat-num").text
+    return int(profile_following_count.replace(",", ""))
+
+
+def profile_likes_count_parser(soup: Tag) -> int:
+    profile_likes_count = soup.find("li", class_="likes")
+    if profile_likes_count is None:
+        return 0
+    profile_likes_count = profile_likes_count.find("span", class_="profile-stat-num").text
+    return int(profile_likes_count.replace(",", ""))
+
+
+def profile_website_parser(soup: Tag) -> str:
+    profile_website = soup.find("div", class_="profile-website")
+    if profile_website:
+        profile_website = profile_website.find("a").get("href")
+        return profile_website
+
+
+def profile_banner_photo_parser(soup: Tag) -> str:
+    profile_banner_photo_tag = soup.find("div", class_="profile-banner")
+    if profile_banner_photo_tag is None:
+        return None
+    profile_banner_photo = profile_banner_photo_tag.find("img").get("src")
+    profile_banner_photo_url = "https://nitter.net" + profile_banner_photo
+    return profile_banner_photo_url
+
+
+def profile_is_verified_parser(soup: Tag) -> bool:
+    profile_is_verified = soup.find("span", class_="icon-ok verified-icon")
+    if profile_is_verified:
+        return True
+    else:
+        return False
+
+
+def profile_parser(soup: Tag) -> Dict:
+    profile = {}
+    profile["name"] = profile_full_name_parser(soup)
+    profile["username"] = profile_username_parser(soup)
+    profile["profile_photo"] = profile_photo_parser(soup)
+    profile["biography"] = profile_biography_parser(soup)
+    profile["location"] = profile_location_parser(soup)
+    profile["joined"] = profile_joined_parser(soup)
+    profile["tweets_count"] = profile_tweets_count_parser(soup)
+    profile["followers_count"] = profile_followers_count_parser(soup)
+    profile["following_count"] = profile_following_count_parser(soup)
+    profile["likes_count"] = profile_likes_count_parser(soup)
+    profile["website"] = profile_website_parser(soup)
+    profile["banner_photo"] = profile_banner_photo_parser(soup)
+    profile["is_verified"] = profile_is_verified_parser(soup)
+    return profile
