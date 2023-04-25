@@ -95,6 +95,12 @@ def hashtag_parser(text):
     return hashtag_regex.findall(text)
 
 
+def fullname_and_verified_parser(soup: Tag) -> tuple:
+    fullname = soup.find("a", class_="fullname")
+    verified = soup.find("span", class_="icon-ok verified-icon")
+    return fullname.text if fullname else None, True if verified else False
+
+
 def parse_tweet(soup: Tag) -> Dict:
     data = {}
     id, username, url = link_parser(soup.find("a", class_="tweet-link"))
@@ -102,6 +108,7 @@ def parse_tweet(soup: Tag) -> Dict:
     data["nitter_url"] = url
     data["tweet_url"] = url.replace("nitter.net", "twitter.com")
     data["username"] = username
+    data["fullname"], data["is_verified"] = fullname_and_verified_parser(soup)
 
     retweet = soup.find("div", class_="retweet-header")
     data["is_retweet"] = True if retweet else False
