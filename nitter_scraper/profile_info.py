@@ -34,10 +34,9 @@ def get_profile(username: str) -> Optional[Profile]:
             return None
 
         profile_info = profile_parser(soup)
-        return profile_info
-        # profile = Profile.from_dict(profile_info)
+        profile = Profile.from_dict(profile_info)
 
-        # return profile
+        return profile
 
     elif response.status_code == 404:
         raise ValueError("The target profile does not exist.")
