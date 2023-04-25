@@ -29,6 +29,7 @@ class Tweet(Base):
     tweet_url: str
     nitter_url: str
     username: str
+    fullname: str
     is_retweet: bool
     is_pinned: bool
     date: datetime
