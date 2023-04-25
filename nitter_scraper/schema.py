@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel as Base
 
@@ -29,7 +29,8 @@ class Tweet(Base):
     tweet_url: str
     nitter_url: str
     username: str
-    fullname: str
+    is_verified: bool
+    fullname: Optional[str]
     is_retweet: bool
     is_pinned: bool
     date: datetime
