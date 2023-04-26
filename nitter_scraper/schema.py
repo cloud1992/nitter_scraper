@@ -92,7 +92,7 @@ class Profile(Base):
     following_count: int
     followers_count: int
     likes_count: int
-    website: str
+    website: Optional[str] = None
     banner_photo: str
     is_verified: bool
 
