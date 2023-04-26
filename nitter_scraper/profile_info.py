@@ -33,8 +33,7 @@ def get_profile(username: str) -> Optional[Profile]:
         if profile is None:
             return None
 
-        profile_info = profile_parser(soup)
-        profile = Profile.from_dict(profile_info)
+        profile = Profile.from_dict(profile)
 
         return profile
 
