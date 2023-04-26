@@ -49,6 +49,9 @@ def link_parser(tweet_link):
 
 def date_parser(tweet_date):
     date_format = "%b %d, %Y · %I:%M %p %Z"
+    date_format_2 = "%b %d, %Y B· %I:%M %p"
+    if "B·" in tweet_date:
+        date = datetime.strptime(tweet_date, date_format_2)
     date = datetime.strptime(tweet_date, date_format)
     return date
 
@@ -155,12 +158,16 @@ def parse_tweet(soup: Tag) -> Dict:
 
 # profile parser#
 def profile_full_name_parser(soup: Tag) -> str:
-    profile_full_name = soup.find("a", class_="profile-card-fullname").text
+    profile_full_name = soup.find("a", class_="profile-card-fullname")
+    if profile_full_name:
+        profile_full_name = profile_full_name.text
     return profile_full_name
 
 
 def profile_username_parser(soup: Tag) -> str:
-    profile_username = soup.find("a", class_="profile-card-username").text
+    profile_username = soup.find("a", class_="profile-card-username")
+    if profile_username:
+        profile_username = profile_username.text
     return profile_username.replace("@", "")
 
 
@@ -174,7 +181,12 @@ def profile_photo_parser(soup: Tag) -> str:
 
 
 def profile_biography_parser(soup: Tag) -> str:
-    profile_biography = soup.find("div", class_="profile-bio").text
+    profile_biography = soup.find("div", class_="profile-bio")
+    if profile_biography:
+        profile_biography = profile_biography.text
+    else:
+        return None
+
     return profile_biography
 
 
@@ -200,32 +212,40 @@ def profile_tweets_count_parser(soup: Tag) -> int:
     profile_tweets_count = soup.find("li", class_="posts")
     if profile_tweets_count is None:
         return 0
-    profile_tweets_count = profile_tweets_count.find("span", class_="profile-stat-num").text
-    return int(profile_tweets_count.replace(",", ""))
+    profile_tweets_count = profile_tweets_count.find("span", class_="profile-stat-num")
+    if profile_tweets_count is None:
+        return 0
+    return int(profile_tweets_count.text.replace(",", ""))
 
 
 def profile_followers_count_parser(soup: Tag) -> int:
     profile_followers_count = soup.find("li", class_="followers")
     if profile_followers_count is None:
         return 0
-    profile_followers_count = profile_followers_count.find("span", class_="profile-stat-num").text
-    return int(profile_followers_count.replace(",", ""))
+    profile_followers_count = profile_followers_count.find("span", class_="profile-stat-num")
+    if profile_followers_count is None:
+        return 0
+    return int(profile_followers_count.text.replace(",", ""))
 
 
 def profile_following_count_parser(soup: Tag) -> int:
     profile_following_count = soup.find("li", class_="following")
     if profile_following_count is None:
         return 0
-    profile_following_count = profile_following_count.find("span", class_="profile-stat-num").text
-    return int(profile_following_count.replace(",", ""))
+    profile_following_count = profile_following_count.find("span", class_="profile-stat-num")
+    if profile_following_count is None:
+        return 0
+    return int(profile_following_count.text.replace(",", ""))
 
 
 def profile_likes_count_parser(soup: Tag) -> int:
     profile_likes_count = soup.find("li", class_="likes")
     if profile_likes_count is None:
         return 0
-    profile_likes_count = profile_likes_count.find("span", class_="profile-stat-num").text
-    return int(profile_likes_count.replace(",", ""))
+    profile_likes_count = profile_likes_count.find("span", class_="profile-stat-num")
+    if profile_likes_count is None:
+        return 0
+    return int(profile_likes_count.text.replace(",", ""))
 
 
 def profile_website_parser(soup: Tag) -> str:
@@ -239,8 +259,10 @@ def profile_banner_photo_parser(soup: Tag) -> str:
     profile_banner_photo_tag = soup.find("div", class_="profile-banner")
     if profile_banner_photo_tag is None:
         return None
-    profile_banner_photo = profile_banner_photo_tag.find("img").get("src")
-    profile_banner_photo_url = "https://nitter.net" + profile_banner_photo
+    profile_banner_photo = profile_banner_photo_tag.find("img")
+    if profile_banner_photo is None:
+        return None
+    profile_banner_photo_url = "https://nitter.net" + profile_banner_photo.get("src")
     return profile_banner_photo_url
 
 

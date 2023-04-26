@@ -84,16 +84,16 @@ class Profile(Base):
 
     username: str
     name: str
-    profile_photo: str
-    biography: str
+    profile_photo: Optional[str] = None
+    biography: Optional[str] = None
     joined: datetime
-    location: str
+    location: Optional[str] = None
     tweets_count: int
     following_count: int
     followers_count: int
     likes_count: int
     website: Optional[str] = None
-    banner_photo: str
+    banner_photo: Optional[str] = None
     is_verified: bool
 
     @classmethod
