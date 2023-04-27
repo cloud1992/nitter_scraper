@@ -36,7 +36,7 @@ def get_tweets(
     """
     if search_kind == "user":
         address = f"https://nitter.{extension}"
-        url = f"{address}/{username}"
+        url = f"{address}/{username}/with_replies"
     else:
         url = address
 
