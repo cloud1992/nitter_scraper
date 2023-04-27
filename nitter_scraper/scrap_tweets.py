@@ -71,11 +71,11 @@ def get_tweets(
                     yield tweet
 
                 next_url = pagination_parser(timeline, username, search_kind)
-            # print(f"Next URL: {next_url}")
-            if next_url == "search ended":
-                pages = 0
-                break
-            response = requests.get(next_url)
-            pages -= 1
+                # print(f"Next URL: {next_url}")
+                if next_url == "search ended":
+                    pages = 0
+                    break
+                response = requests.get(next_url)
+                pages -= 1
 
     yield from gen_tweets(pages)
