@@ -7,7 +7,7 @@ from nitter_scraper.schema import Profile
 from nitter_scraper.utils import profile_parser
 
 
-def get_profile(username: str) -> Optional[Profile]:
+def get_profile(username: str, extension: str) -> Optional[Profile]:
     """Scrapes nitter for the target users profile information.
 
     Args:
@@ -22,13 +22,13 @@ def get_profile(username: str) -> Optional[Profile]:
 
     """
 
-    url = f"https://nitter.net/{username}"
+    url = f"https://nitter.{extension}/{username}"
     response = requests.get(url)
 
     if response.status_code == 200:
         html = response.content
         soup = BeautifulSoup(html, "html.parser")
-        profile = profile_parser(soup)
+        profile = profile_parser(soup, extension)
 
         if profile is None:
             return None

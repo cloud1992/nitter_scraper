@@ -13,6 +13,7 @@ from nitter_scraper.utils import (  # noqa: I100, I202
 
 def get_tweets(
     search_kind: str,
+    extension: str,
     username: str = "elonmusk",
     pages: int = 25,
     break_on_tweet_id: Optional[int] = None,
@@ -26,7 +27,7 @@ def get_tweets(
         username: Targeted users username.
         pages: Max number of pages to lookback starting from the latest tweet.
         break_on_tweet_id: Gives the ability to break out of a loop if a tweets id is found.
-        address: The address to scrape from. The default if search_kind = "user" is https://nitter.net which should
+        address: The address to scrape from. The default if search_kind = "user" is https://nitter.extension which should
             be used as a fallback address, else the address is the search url.
 
     Yields:
@@ -34,7 +35,7 @@ def get_tweets(
 
     """
     if search_kind == "user":
-        address = "https://nitter.net"
+        address = f"https://nitter.{extension}"
         url = f"{address}/{username}"
     else:
         url = address
@@ -61,7 +62,7 @@ def get_tweets(
                     if "show-more" in item.get("class"):
                         continue
 
-                    tweet_data = parse_tweet(item)
+                    tweet_data = parse_tweet(item, extension)
                     tweet = Tweet.from_dict(tweet_data)
 
                     if tweet.tweet_id == break_on_tweet_id:
@@ -70,7 +71,7 @@ def get_tweets(
 
                     yield tweet
 
-                next_url = pagination_parser(timeline, username, search_kind)
+                next_url = pagination_parser(timeline, extension, username, search_kind)
                 # print(f"Next URL: {next_url}")
                 if next_url == "search ended":
                     pages = 0

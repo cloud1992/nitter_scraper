@@ -9,7 +9,7 @@ def timeline_parser(soup: Tag):
     return soup.find("div", class_="timeline")
 
 
-def pagination_parser(timeline, username: str, search_kind: str) -> str:
+def pagination_parser(timeline, extension: str, username: str, search_kind: str) -> str:
     show_more_tag = timeline.find("div", class_="show-more")
     next_page = ""
     if show_more_tag is not None:
@@ -27,23 +27,23 @@ def pagination_parser(timeline, username: str, search_kind: str) -> str:
             if next_page_tag is not None:
                 next_page = next_page_tag.get("href")
     if search_kind == "user":
-        return f"https://nitter.net/{username}{next_page}"
+        return f"https://nitter.{extension}/{username}{next_page}"
     else:
-        return f"https://nitter.net/search{next_page}"
+        return f"https://nitter.{extension}/search{next_page}"
 
 
 def clean_stat(stat):
     return int(stat.replace(",", ""))
 
 
-def link_parser(tweet_link):
+def link_parser(tweet_link, extension: str):
     link = tweet_link.get("href")
     tweet_url = link
     parts = tweet_url.split("/")
 
     tweet_id = parts[-1].replace("#m", "")
     username = parts[1]
-    tweet_url = f"https://nitter.net{tweet_url}"
+    tweet_url = f"https://nitter.{extension}{tweet_url}"
     return tweet_id, username, tweet_url
 
 
@@ -68,15 +68,15 @@ def stats_parser(tweet_stats):
     return stats
 
 
-def attachment_parser(attachments):
+def attachment_parser(attachments, extension: str):
     photos, videos = [], []
     if attachments:
         if attachments.find("img"):
-            photos = ["https://nitter.net" + i.get("src") for i in attachments.find_all("img")]
+            photos = [f"https://nitter.{extension}" + i.get("src") for i in attachments.find_all("img")]
         else:
             photos = []
         if attachments.find("source"):
-            videos = ["https://nitter.net" + i.get("src") for i in attachments.find_all("source")]
+            videos = [f"https://nitter.{extension}" + i.get("src") for i in attachments.find_all("source")]
         else:
             videos = []
 
@@ -104,12 +104,12 @@ def fullname_and_verified_parser(soup: Tag) -> tuple:
     return fullname.text if fullname else None, True if verified else False
 
 
-def parse_tweet(soup: Tag) -> Dict:
+def parse_tweet(soup: Tag, extension: str) -> Dict:
     data = {}
-    id, username, url = link_parser(soup.find("a", class_="tweet-link"))
+    id, username, url = link_parser(soup.find("a", class_="tweet-link"), extension)
     data["tweet_id"] = id
     data["nitter_url"] = url
-    data["tweet_url"] = url.replace("nitter.net", "twitter.com")
+    data["tweet_url"] = url.replace(f"nitter.{extension}", "twitter.com")
     data["username"] = username
     data["fullname"], data["is_verified"] = fullname_and_verified_parser(soup)
 
@@ -149,7 +149,7 @@ def parse_tweet(soup: Tag) -> Dict:
     data["cashtags"] = cashtag_parser(content.text)
     data["urls"] = url_parser(content.text)
 
-    photos, videos = attachment_parser(body.find("div", class_="attachments"))
+    photos, videos = attachment_parser(body.find("div", class_="attachments"), extension)
     data["photos"] = photos
     data["videos"] = videos
 
@@ -171,12 +171,12 @@ def profile_username_parser(soup: Tag) -> str:
     return profile_username.replace("@", "")
 
 
-def profile_photo_parser(soup: Tag) -> str:
+def profile_photo_parser(soup: Tag, extension: str) -> str:
     profile_photo_tag = soup.find("a", class_="profile-card-avatar")
     if profile_photo_tag is None:
         return None
     profile_photo = profile_photo_tag.find("img").get("src")
-    profile_photo_url = "https://nitter.net" + profile_photo
+    profile_photo_url = f"https://nitter.{extension}" + profile_photo
     return profile_photo_url
 
 
@@ -255,14 +255,14 @@ def profile_website_parser(soup: Tag) -> str:
         return profile_website
 
 
-def profile_banner_photo_parser(soup: Tag) -> str:
+def profile_banner_photo_parser(soup: Tag, extension: str) -> str:
     profile_banner_photo_tag = soup.find("div", class_="profile-banner")
     if profile_banner_photo_tag is None:
         return None
     profile_banner_photo = profile_banner_photo_tag.find("img")
     if profile_banner_photo is None:
         return None
-    profile_banner_photo_url = "https://nitter.net" + profile_banner_photo.get("src")
+    profile_banner_photo_url = f"https://nitter.{extension}" + profile_banner_photo.get("src")
     return profile_banner_photo_url
 
 
@@ -274,11 +274,11 @@ def profile_is_verified_parser(soup: Tag) -> bool:
         return False
 
 
-def profile_parser(soup: Tag) -> Dict:
+def profile_parser(soup: Tag, extension: str) -> Dict:
     profile = {}
     profile["name"] = profile_full_name_parser(soup)
     profile["username"] = profile_username_parser(soup)
-    profile["profile_photo"] = profile_photo_parser(soup)
+    profile["profile_photo"] = profile_photo_parser(soup, extension)
     profile["biography"] = profile_biography_parser(soup)
     profile["location"] = profile_location_parser(soup)
     profile["joined"] = profile_joined_parser(soup)
@@ -287,6 +287,6 @@ def profile_parser(soup: Tag) -> Dict:
     profile["following_count"] = profile_following_count_parser(soup)
     profile["likes_count"] = profile_likes_count_parser(soup)
     profile["website"] = profile_website_parser(soup)
-    profile["banner_photo"] = profile_banner_photo_parser(soup)
+    profile["banner_photo"] = profile_banner_photo_parser(soup, extension)
     profile["is_verified"] = profile_is_verified_parser(soup)
     return profile
