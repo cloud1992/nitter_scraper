@@ -78,5 +78,8 @@ def get_tweets(
                     break
                 response = requests.get(next_url)
                 pages -= 1
+            else:
+                print("Error")
+                break
 
     yield from gen_tweets(pages)
