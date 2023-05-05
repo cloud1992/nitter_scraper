@@ -49,11 +49,13 @@ def link_parser(tweet_link, extension: str):
 
 def date_parser(tweet_date):
     date_format = "%b %d, %Y · %I:%M %p %Z"
-    date_format_2 = "%b %d, %Y B· %I:%M %p"
-    if "B·" in tweet_date:
-        date = datetime.strptime(tweet_date, date_format_2)
-    else:
-        date = datetime.strptime(tweet_date, date_format)
+    # date_format_2 = "%b %d, %Y B· %I:%M %p %Z"
+    if "В·" in tweet_date:
+        tweet_date = tweet_date.replace("В·", "·")
+    #     date = datetime.strptime(tweet_date, date_format)
+    # else:
+    #     date = datetime.strptime(tweet_date, date_format)
+    date = datetime.strptime(tweet_date, date_format)
     return date
 
 

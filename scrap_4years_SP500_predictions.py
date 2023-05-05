@@ -39,7 +39,7 @@ for i, tweet in enumerate(tweets):
 
         print(f"tweet number {i} and tweet date {tweet.get('date')}")
         tweet["date"] = tweet.get("date").strftime("%Y-%m-%d %H:%M:%S")
-        with open("tweets_SP500.json", "w") as f:
+        with open("tweets_SP500.json", "a") as f:
             json.dump(tweet, f)
             f.write("\n")
 
