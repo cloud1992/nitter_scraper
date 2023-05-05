@@ -52,7 +52,8 @@ def date_parser(tweet_date):
     date_format_2 = "%b %d, %Y B· %I:%M %p"
     if "B·" in tweet_date:
         date = datetime.strptime(tweet_date, date_format_2)
-    date = datetime.strptime(tweet_date, date_format)
+    else:
+        date = datetime.strptime(tweet_date, date_format)
     return date
 
 
